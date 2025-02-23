@@ -27,10 +27,12 @@ namespace EncryptionApp.API.Controllers
             {
                 string encryptedText = string.Empty;
 
+                var iv = GenerateIV(16);
+
                 using (Aes aesAlg = Aes.Create())
                 {
                     aesAlg.Key = Convert.FromBase64String(key);
-                    aesAlg.IV = new byte[16];
+                    aesAlg.IV = iv;
 
                     ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
@@ -46,7 +48,7 @@ namespace EncryptionApp.API.Controllers
                     }
                 }
 
-                return Ok(encryptedText);
+                return Json( new { encryptedText = encryptedText, iv = Convert.ToBase64String(iv) });
             }
             catch (Exception ex)
             {
@@ -55,11 +57,11 @@ namespace EncryptionApp.API.Controllers
         }
 
         [HttpPost("decrypt")]
-        public IActionResult Decrypt(string cipherText, string key)
+        public IActionResult Decrypt(string cipherText, string key, string iv)
         {
             if (string.IsNullOrEmpty(cipherText))
             {
-                return BadRequest(new { error = "Text to encrypt is required" });
+                return BadRequest(new { error = "Text to decrypt is required" });
             }
             try
             {
@@ -69,7 +71,7 @@ namespace EncryptionApp.API.Controllers
                 using (Aes aesAlg = Aes.Create())
                 {
                     aesAlg.Key = Convert.FromBase64String(key);
-                    aesAlg.IV = new byte[16];
+                    aesAlg.IV = Convert.FromBase64String(iv);
 
                     ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
@@ -86,11 +88,21 @@ namespace EncryptionApp.API.Controllers
                     }
                 }
 
-                return Ok(decryptedText);
+                return Json( new { decryptedText = decryptedText });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        private byte[] GenerateIV(int ivLength)
+        {
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                byte[] iv = new byte[ivLength];
+                rng.GetBytes(iv);
+                return iv;
             }
         }
     }
