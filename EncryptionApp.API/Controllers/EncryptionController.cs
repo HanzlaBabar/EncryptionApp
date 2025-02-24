@@ -6,6 +6,9 @@ using System.Text;
 
 namespace EncryptionApp.API.Controllers
 {
+    /// <summary>
+    /// Controller to encrypt and decrypt text using AES algorithm
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class EncryptionController : Controller
@@ -15,6 +18,12 @@ namespace EncryptionApp.API.Controllers
         {
         }
 
+        /// <summary>
+        /// Encrypts the plain text using AES algorithm
+        /// </summary>
+        /// <param name="plainText"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
         [HttpPost("encrypt")]
         public IActionResult Encrypt(string plainText, string key)
         {
@@ -56,6 +65,13 @@ namespace EncryptionApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Decrypts the cipher text using AES algorithm
+        /// </summary>
+        /// <param name="cipherText"></param>
+        /// <param name="key"></param>
+        /// <param name="iv"></param>
+        /// <returns></returns>
         [HttpPost("decrypt")]
         public IActionResult Decrypt(string cipherText, string key, string iv)
         {
